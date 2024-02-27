@@ -51,7 +51,8 @@ library(ggplot2)
 # The code removes the pesky "X" column created to label row names, then 
 # formats the Date.Time column to a POSIXct format
 
-wlr <- read.csv("Formatted Datasets\\WLR Formatted Dataset.csv") %>%
+wlr <- read.csv(paste("Formatted Datasets\\", Site_Name, "WLR Formatted Dataset.csv", 
+                      collapse = "")) %>%
   select(-X) %>%
   mutate(Date.Time = as.POSIXct(Date.Time, format = '%Y-%m-%d %H:%M:%S'))
 
@@ -61,7 +62,7 @@ glimpse(wlr)
 #Second input is the marsh platform and root zone elevations
 
 #USER INPUT NEEDED:
-elevs <- read.csv("Input Data\\KentsIsland_Elevations_2023.csv")
+elevs <- read.csv("Input Data\\Example Marsh and Root Zone Elevations.csv")
 
 glimpse(elevs)
 
@@ -70,7 +71,7 @@ glimpse(elevs)
 # with associated marsh platform elevation, root zone elevation, and associated creeks
 
 #USER INPUT NEEDED:
-sparrow <- read.csv("Input Data\\KentsIsland_SparrowIsland_csv.csv")
+sparrow <- read.csv("Input Data\\Example Sparrow Island Elevations.csv")
 
 glimpse(sparrow)
 
@@ -81,34 +82,46 @@ glimpse(sparrow)
 #The code is designed for the user to input the name of the individual water level recorder and the
 # code will automatically subset the datasets to the WLR and its associated creek WLR. 
 
+#USER INPUT NEEDED:
+
 wlr_name <- "RUN1"
+
+wlr_graph_name <- "Runnel 1"
+
 
 creek_name <- elevs$Associated_Creek[which(elevs$WLR == wlr_name)]
 
-# First, subset the formatted water level elevation datset to the specific water level recorder and 
+creek_graph_name <- "Creek 1"
+
+
+# First, subset the formatted water level elevation dataset to the specific water level recorder and 
 # the creek water level recorder
 
 wlr_subset <- wlr %>%
-  gather(key = WLR, value = elev, Creek:length(wlr)) %>%
-  filter(WLR == wlr_name | WLR == creek_name)
+  gather(key = WLR, value = elev, 2:length(wlr)) %>%
+  filter(WLR == wlr_name | WLR == creek_name) 
 
 wlr_min <- min(wlr_subset$elev[which(wlr_subset$WLR == wlr_name)])
 
 wlr_max <- max(wlr_subset$elev)
 
+wlr_subset <- wlr_subset %>%
+  mutate(WLR = ifelse(WLR == wlr_name, wlr_graph_name,
+                      ifelse(WLR == creek_name, creek_graph_name, WLR)))
+
 #Second, subset the marsh platform and root zone elevation dataset to the specific WLR
 
 elevs_subset <- elevs %>%
-  filter(Groundwater_WLR == wlr_name)
+  filter(WLR == wlr_name)
 
 platform_elev <- elevs_subset$Marsh_Elevation
 
 rootzone_elev <- elevs_subset$Rootzone_Elevation
 
-#Third, subset the sparrow island elevaiton dataset to the specific WLR/Treatment
+#Third, subset the sparrow island elevation dataset to the specific WLR/Treatment
 
 sparrow_subset <- sparrow %>%
-  filter(WLR == wlr_name)
+  filter(Groundwater_WLR == wlr_name)
 
 sparrow_elev <- sparrow_subset$Elevation
 
@@ -154,6 +167,6 @@ Tidegraph
 #Save the graph to the 'Figures' Folder of the project
 
 ggsave(Tidegraph,
-       path = paste("Figures\\", wlr_name, " Water Level Elevations Graph.jpg", collapse = ""), 
+       filename = paste("Figures\\", wlr_name, " Water Level Elevations Graph.jpg", sep = ""), 
        height = 806, width = 1536, 
        units = "px", dpi = 125)

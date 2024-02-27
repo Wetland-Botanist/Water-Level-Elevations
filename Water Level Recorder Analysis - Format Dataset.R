@@ -36,12 +36,12 @@ library(DescTools)
 
 #Chapter 2: Import the water level elevation time series dataset
 
-wlr <- read.csv("Input Data\\KentsIsland_WLR_Compiled_2023_Adjusted_July4.csv")
+wlr <- read.csv("Input Data\\Example Water Level Elevation.csv")
 
 glimpse(wlr)
 
 
-Site_Name <- "Essex"
+Site_Name <- "Example"
 
 
 #Chapter 3: Format the Dataset
@@ -67,7 +67,7 @@ wlr <- wlr %>%
 
 lunar_cycle <- data.frame(matrix(nrow = 1, ncol = 6)) %>%
   setNames(c("Site", 'Year', 'Start_Date', 'End_Date', 'Middle_Date', 'Deployment_Time')) %>%
-  mutate( Site = WLR_Site,
+  mutate( Site = Site_Name,
           Year = year(wlr$Date.Time[1]),
     
     #Deployment time is calculated as the total duration of the water level elevation dataset

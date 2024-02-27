@@ -1,0 +1,14 @@
+WLR,Associated_Creek,Marsh_Elevation,Rootzone_Elevation
+RUN1,Creek1,1.406,1.356
+NAC1,Creek1,1.408,1.358
+NAC1Pool,Creek1,1.417,1.367
+Ditch1,Creek1,1.172,1.122
+REF,Creek1,1.347,1.297
+RUN2,Creek2,1.345,1.295
+RUN2Pool,Creek2,1.254,1.204
+NAC2,Creek2,1.438,1.418
+Ditch2,Creek2,1.29,1.24
+RUN3,Creek3,1.413,1.363
+RUN3Pool,Creek3,1.316,1.266
+NAC3,Creek3,1.38,1.33
+Ditch3,Creek3,1.332,1.282

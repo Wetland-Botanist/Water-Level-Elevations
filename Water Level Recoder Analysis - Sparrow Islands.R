@@ -50,7 +50,8 @@ library(VulnToolkit)
 # The code removes the pesky "X" column created to label row names, then 
 # formats the Date.Time column to a POSIXct format
 
-wlr <- read.csv("Formatted Datasets\\WLR Formatted Dataset.csv") %>%
+wlr <- read.csv(paste("Formatted Datasets\\", Site_Name, "WLR Formatted Dataset.csv", 
+                      collapse = "")) %>%
   select(-X) %>%
   mutate(Date.Time = as.POSIXct(Date.Time, format = '%Y-%m-%d %H:%M:%S'))
 
@@ -62,15 +63,18 @@ glimpse(wlr)
 
 #USER INPUT NEEDED:
 
-sparrow <- read.csv("Input Data\\KentsIsland_SparrowIsland_csv.csv")
+sparrow <- read.csv("Input Data\\Example Sparrow Island Elevations.csv")
 
 glimpse(sparrow)
+
+
 
 #The third input is the tidal hydrology (low tide, high tide, higher high tide) dataset of the creek water level 
 # recorders. The creek tidal hydrology dataset will be used to calculate the high tide flooding frequency of the
 # the sparrow islands.
 
-tides <- read.csv("Formatted Datasets\\Creek Tidal Hydrology Dataset.csv") %>%
+tides <- read.csv(paste("Formatted Datasets\\", Site_Name, "Creek Tidal Hydrology Dataset.csv", 
+                                  collapse = "")) %>%
   select(-X)
 
 glimpse(tides)
@@ -83,7 +87,8 @@ glimpse(tides)
 wlr_format <- wlr %>%
   #Select only the creek water level recorders
   select(Date.Time, starts_with("Creek")) %>%
-  gather(key = WLR, value = elev, Creek) %>%
+  gather(key = WLR, value = elev, 
+         colnames(select(., starts_with("Creek")))) %>%
   #Combines the sparrow island dataset with the formatted creek WLR dataset, so now
   #each sparrow island is associated with a full water level elevation dataset in the monitoring period
   merge(select(sparrow, Island, WLR, Elevation), by = "WLR") %>%
@@ -145,8 +150,8 @@ sparrow_dry <- wlr_format %>%
   filter(elev > sparrow_elev) %>%
   #Calculates maximum time difference through the entire dataset
   summarise(island_dry = max(diff.Date(Date.Time))/ddays(1)) %>%
-  mutate(island_dry = as.numeric(Dry_Period),
-         island_dry = round(Dry_Period, 2)) %>%
+  mutate(island_dry = as.numeric(island_dry),
+         island_dry = round(island_dry, 2)) %>%
   ungroup()
 
 
@@ -162,7 +167,7 @@ sparrow_stats <- sparrow %>%
   rename(Flooding_Duration_Percent = island_flood,
          HT_Frequency_Percent = island_freq,
          Max_Dry_Period_days = island_dry) %>%
-  select(Island, Treatment, WLR, Count, Elevation,
+  select(Island, Groundwater_WLR, WLR, Elevation,
          Flooding_Duration_Percent, HT_Frequency_Percent, Max_Dry_Period_days)
 
 write.csv(sparrow_stats,

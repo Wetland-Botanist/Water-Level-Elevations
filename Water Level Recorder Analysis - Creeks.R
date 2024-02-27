@@ -45,7 +45,8 @@ library(VulnToolkit)
 
 # The code removes the pesky "X" column created to label row names
 
-wlr <- read.csv("Formatted Datasets\\WLR Formatted Dataset.csv") %>%
+wlr <- read.csv(paste("Formatted Datasets\\", Site_Name, "WLR Formatted Dataset.csv", 
+                      collapse = "")) %>%
   select(-X)
 
 glimpse(wlr)
@@ -70,7 +71,8 @@ wlr_format <- wlr %>%
 wlr_tides <- wlr_format %>%
   group_by(WLR) %>%
   nest() %>%
-  mutate(tides = HL(level = elev, time = Date.Time, period = 12.5)) %>%
+  mutate(tides = map(.x = data,
+                     ~HL(level = .x$elev, time = .x$Date.Time, period = 12.5))) %>%
   unnest(tides) %>%
   ungroup() %>%
   select(-data)

@@ -51,7 +51,8 @@ library(VulnToolkit)
 #First, input the 
 # The code removes the pesky "X" column created to label row names
 
-wlr <- read.csv("Formatted Datasets\\WLR Formatted Dataset.csv") %>%
+wlr <- read.csv(paste("Formatted Datasets\\", Site_Name, "WLR Formatted Dataset.csv", 
+                      collapse = "")) %>%
   select(-X) 
 
 glimpse(wlr)
@@ -62,7 +63,7 @@ glimpse(wlr)
 
 #USER INPUT NEEDED:
 
-elevs <- read.csv("Input Data\\Essex\\Essex_2023_WLR_Elevations.csv")
+elevs <- read.csv("Input Data\\Example Marsh and Root Zone Elevations.csv")
 
 glimpse(elevs)
 
@@ -227,7 +228,7 @@ wlr_flood <- wlr_format %>%
             
             root_elev = Rootzone_Elevation[1]) %>%
 ungroup() %>%
-  mutate(across(marsh_flood:root_flood, ~round(., 3)))
+  mutate(across(marsh_flood:root_flood, ~round(., 1)))
 
 
 
@@ -265,7 +266,7 @@ wlr_freq <- wlr_tides %>%
   ungroup() %>%
   #Flooding frequency columns are in a 'list' format, reformat to double and round to 2 decimal points
   mutate(across(c(marsh_freq, root_freq), ~as.numeric(.)),
-         across(c(marsh_freq, root_freq), ~round(., 3)))
+         across(c(marsh_freq, root_freq), ~round(., 1)))
 
 glimpse(wlr_freq)
 
