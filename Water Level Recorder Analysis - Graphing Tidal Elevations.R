@@ -99,7 +99,7 @@ wlr_max <- max(wlr_subset$elev)
 #Second, subset the marsh platform and root zone elevation dataset to the specific WLR
 
 elevs_subset <- elevs %>%
-  filter(WLR == wlr_name)
+  filter(Groundwater_WLR == wlr_name)
 
 platform_elev <- elevs_subset$Marsh_Elevation
 

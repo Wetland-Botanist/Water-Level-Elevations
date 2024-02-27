@@ -49,9 +49,9 @@ Column Names and Explanation:
 
 Island = name or code of the constructed sparrow island
 
-WLR = name of the groundwater or pool water level recorder closest to the sparrow island. The column is only used for graphing purposes.
+Groundwater_WLR = name of the groundwater or pool water level recorder closest to the sparrow island. The column is only used for graphing purposes.
 
-Creek_WLR = name of the creek water level recoder measuring the tidal hydrology that impacts the sparrow island. The column is used for data analysis and hydrology metrics calculations.
+WLR = name of the creek water level recoder measuring the tidal hydrology that impacts the sparrow island. The column is used for data analysis and hydrology metrics calculations.
 
 Elevation - Elevation of the top of the sparrow island. Units in NAVD88 meters. 
 
