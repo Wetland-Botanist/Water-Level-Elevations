@@ -26,7 +26,11 @@ Folders:
 See individual README files in each folder for more in-depth details.
 
 1) Input Data - folder the user of the R project will need to deposit the necessary datasets. See the folder README for in-depth details on the dataset needs for the R scripts.
-2) Dataset Templates -
+   
+2) Dataset Templates - blank CSV files with appropriate column headers (and blank cells) for the needed input datasets
+   
 3) Formatted Datasets -  an intermediary folder that holds various water level elevation datasets that are created in one R script and utilized in the another R script'
+   
 4) Output Stats - destination of finalized tables for the descriptive statistics of tidal hydrology of creek, groundwater, and pool water level recorders and flooding for groundwater level recoders and constructed sparrow islands.
+   
 5) Figures - output of water level tidal elevation graphs in JPG format
