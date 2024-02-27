@@ -1,0 +1,11 @@
+"","WLR","zone","elevation","Flood_Duration_Percent","HT_Frequency_Percent","Mean_LT","Drainage"
+"1","Ditch2_GW","Marsh Platform",1.221,0.136,0.5,1.056,0.165
+"2","Ditch2_GW","Root Zone",1.171,0.341,0.594,1.056,0.115
+"3","Ditch3_GW","Marsh Platform",1.263,0.138,0.439,1.122,0.141
+"4","Ditch3_GW","Root Zone",1.213,0.377,0.515,1.122,0.091
+"5","NAC3_GW","Marsh Platform",1.345,0.679,0.806,1.35,-0.00500000000000012
+"6","NAC3_GW","Root Zone",1.295,0.84,0.91,1.35,-0.0550000000000002
+"7","RUN3_GW","Marsh Platform",1.436,0.077,0.388,1.363,0.073
+"8","RUN3_GW","Root Zone",1.386,0.626,0.731,1.363,0.0229999999999999
+"9","RUN3_Pool","Marsh Platform",0.967,1,1,1.32,-0.353
+"10","RUN3_Pool","Root Zone",0.917,1,1,1.32,-0.403

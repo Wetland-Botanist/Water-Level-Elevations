@@ -36,12 +36,12 @@ library(DescTools)
 
 #Chapter 2: Import the water level elevation time series dataset
 
-wlr <- read.csv("Input Data\\Essex\\Essex_2023_Compiled.csv")
+wlr <- read.csv("Input Data\\KentsIsland_WLR_Compiled_2023_Adjusted_July4.csv")
 
 glimpse(wlr)
 
 
-WLR_Site <- "Essex"
+Site_Name <- "Essex"
 
 
 #Chapter 3: Format the Dataset
@@ -73,17 +73,20 @@ lunar_cycle <- data.frame(matrix(nrow = 1, ncol = 6)) %>%
     #Deployment time is calculated as the total duration of the water level elevation dataset
     #Deployment time is calculated with the as.duration() function that converts the entire dataset to the number of seconds
     #Deployment time is then divided by the number of days to calculate the depoyment time in days
-        Deployment_Time = as.duration(wlr$Date.Time[1] %--% wlr$Date.Time[nrow(wlr)])/ddays(1),
+        Deployment_Time = as.duration(min(wlr$Date.Time) %--% max(wlr$Date.Time))/ddays(1),
         Deployment_Time = round(Deployment_Time, 2),
     
     #Middle, Start, and End dates are calculated with the lubridate() package with quick mathematics of dates
     #Currently, start and end dates are calculated as +/- 15 days from the middle date
-         Middle_Date = Deployment_Time + wlr$Date.Time[1],
+         Middle_Date = days(round(Deployment_Time / 2, 0)) + wlr$Date.Time[1],
          Start_Date = Middle_Date - days(15),
-         End_Date = Middle_Date + days(15))
+         End_Date = Middle_Date + days(15),
+    
+          Analysis_Time = as.duration(Start_Date %--% End_Date) / ddays(1))
 
 write.csv(lunar_cycle,
-          "Formatted Datasets\\WLR Deployment Metadata.csv")
+          paste("Formatted Datasets\\", Site_Name, "WLR Deployment Metadata.csv", 
+                collapse = ""))
 
 
 #Next filter the wlr dataset within the parameteres of the start and end dates
@@ -94,7 +97,8 @@ wlr_format <- wlr %>%
 
 
 write.csv(wlr_format,
-          "Formatted Datasets\\WLR Formatted Dataset.csv")
+          paste("Formatted Datasets\\", Site_Name, "WLR Formatted Dataset.csv", 
+                collapse = ""))
 
 
 #Continue onto the Creek Hydrology Analysis code to describe the tidal regime for each creek WLR

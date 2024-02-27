@@ -11,17 +11,17 @@
 #General Explanation of Code:
 # The code is largely a product of the VulnToolkit package created by Troy Hill at the EPA. He devised a fantastic 
 # method to analyze the duration of inundation and frequency of inundation for a given elevation. Additionally,
-# the VulnToolkit caluclates the elevation of the average and maximum high and low tides. 
+# the VulnToolkit calculates the elevation of the average and maximum high and low tides. 
 
-# The overall purpose of the code is to analyze water level elevation data to accurately describe and summarise
+# The overall purpose of the code is to analyze water level elevation data to accurately describe and summarize
 # the tidal hydrology regime for salt marsh systems and groundwater regimes at individual water level recorders
 
-#The second part of the code is to analyze the tidal hydrology regime of the creek water level recoders for a given site
-# The creek water level recoders provide a baseline for the broader salt marsh site, while the individaul water 
-# level recoders provide more granular views of the groundwater or pool hydrology
+#The second part of the code is to analyze the tidal hydrology regime of the creek water level recorders for a given site
+# The creek water level recorders provide a baseline for the broader salt marsh site, while the individual water 
+# level recorders provide more granular views of the groundwater or pool hydrology
 
 # The second part of the code will calculate the low tide, high tide, higher high tide, and spring tide of the
-# creek water level recoders
+# creek water level recorders
 
 
 #Chapter 1: Library of packages for necessary work
@@ -43,8 +43,7 @@ library(VulnToolkit)
 
 #Chapter 2: Import the formatted water level elevation time series dataset
 
-# The code removes the pesky "X" column created to label row names, then
-# The code keeps only the Date.Time column and any columns labelled as "Creeks"
+# The code removes the pesky "X" column created to label row names
 
 wlr <- read.csv("Formatted Datasets\\WLR Formatted Dataset.csv") %>%
   select(-X)
@@ -60,7 +59,9 @@ glimpse(wlr)
 wlr_format <- wlr %>%
   select(Date.Time, starts_with("Creek")) %>%
   mutate(Date.Time = as.POSIXct(Date.Time, format = '%Y-%m-%d %H:%M:%S')) %>%
-  gather(key = WLR, value = elev, Creek1:Creek3) %>%
+  gather(key = WLR, value = elev, 
+         #To make the code universal, the code gathers all columns that are "Creek..."
+         colnames(select(., starts_with("Creek")))) %>%
   arrange(WLR, Date.Time)
 
 
@@ -69,14 +70,17 @@ wlr_format <- wlr %>%
 wlr_tides <- wlr_format %>%
   group_by(WLR) %>%
   nest() %>%
-  mutate(tides = map(.x = data,
-                     ~HL(level = .x$elev, time = .x$Date.Time, period = 12.5))) %>%
+  mutate(tides = HL(level = elev, time = Date.Time, period = 12.5)) %>%
   unnest(tides) %>%
   ungroup() %>%
   select(-data)
 
 
 glimpse(wlr_tides)
+
+write.csv(wlr_tides,
+          paste("Formatted Datasets\\", Site_Name, "Creek Tidal Hydrology Dataset.csv", 
+                collapse = ""))
 
 
 #Chapter 5: Calculate the mean and standard error for hydrology metrics
@@ -137,7 +141,8 @@ creek_stats <- data.frame(matrix(nrow = length(unique(wlr_format$WLR)),
 
 
 write.csv(creek_stats,
-          "Output Stats\\Creek Hydrology Stats.csv")
+          paste("Output Stats\\", Site_Name, "Creek Hydrology Stats.csv", 
+                collapse = ""))
 
 
 #Continue onto the Groundwater and Pool water level recorder analysis R code
