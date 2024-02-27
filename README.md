@@ -1,8 +1,10 @@
 # Analysis of an individual water level recorder for salt marsh monitoring
+
 Authors: Grant McKown (james.mckown@unh.edu), Jennifer Gibson (jennifer.gibson@unh.edu)
+
 Organization: Coastal Habitat Restoration Team, Jackson Estuarine Laboratory, University of New Hampshire
 
-The R package was created to expedite the analysis of tidal water elevation - time series data by caluclating common tidal hydrology metrics (mean low tide, high tide, etc.) and flooding parameters for given elevations of the salt marsh surface (flooding duration, high tide fooding frequency, etc.) as well as graphing the tidal hydrology for an individual water level recorder. 
+The R package was created to expedite the analysis of tidal water elevation - time series data by caluclating common tidal hydrology metrics (mean low tide, high tide, etc.) and flooding parameters for given elevations of the salt marsh surface (flooding duration, high tide fooding frequency, etc.) as well as graphing the tidal hydrology for an individual water level recorder. Any user is free (and encouraged!) to download and use the R package. Note of Warning - the code may be updated from time to time to ensure compatibility with R package updates and enhance capabilities. 
 
 Monitoring Design Requirements:
 The R code is specifically written to meet the hydrology monitoring protocols of the Coastal Habitat Restoration Team. In a given area of salt marsh, two types of water level recorders are deployed simultaneously: Creek and Groundwater/Pool WLRs. The creek WLRs are deployed in ditches or creeks to monitor the site-level tidal hydrology. The groundwater and pool WLRs are placed in PVC piezometers and set 50 - 60 cm belowground with the specific aim of monitoring the changes in groundwater at specific locations. The Coastal Habitat Restoration Team conducts monitoring of salt marsh restoration projects in a BACI design where there is one WLR in the creek, one in the impacted or restored marsh, one in a 'pristine' reference marsh, and one in a degraded no action marsh. The basic requirements for the monitoring design (and R Code) is to have at least one creek WLR and one groundwater/pool WLR. 
