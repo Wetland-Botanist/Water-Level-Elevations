@@ -1,5 +1,4 @@
-# Analysis of an individual water level recorder for salt marsh monitoring
-
+# Analysis of tidal water elevations for a given site across multiple water level recorders
 Authors: Grant McKown (james.mckown@unh.edu), Jennifer Gibson (jennifer.gibson@unh.edu)
 
 Organization: Coastal Habitat Restoration Team, Jackson Estuarine Laboratory, University of New Hampshire
