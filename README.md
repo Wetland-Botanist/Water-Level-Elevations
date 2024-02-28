@@ -27,7 +27,7 @@ Folders:
 
 See individual README files in each folder for more in-depth details.
 
-1) Input Data - folder the user of the R project will need to deposit the necessary datasets. See the folder README for in-depth details on the dataset needs for the R scripts.
+1) Input Data - folder the user of the R project will need to deposit the necessary datasets. See the folder README for in-depth details on the dataset needs for the R scripts. Example datasets are provided in the folder. R script is currently written to run with the example datasets. 
    
 2) Dataset Templates - blank CSV files with appropriate column headers (and blank cells) for the needed input datasets
    
