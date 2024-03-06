@@ -68,11 +68,18 @@ elevs <- read.csv("Input Data\\Example Marsh and Root Zone Elevations.csv")
 glimpse(elevs)
 
 
+#The third input is the high and low water elevations and times for each creek WLR
+
+tides_creek <- read.csv(paste("Formatted Datasets\\", Site_Name, "Creek Tidal Hydrology Dataset.csv", 
+                              collapse = "")) %>%
+  select(-X) %>%
+  mutate(Date.Time = as.POSIXct(time, format = '%Y-%m-%d %H:%M:%S'))
+
 
 #Chapter 3: Format the water level elevation time series dataset
 
 # Code selects only the Date.Time and any columns with "Creek" in the name,
-# reformats the Date.Time column, and creates a long dataset to allow for dplyr for future analysis
+# re-formats the Date.Time column, and creates a long dataset to allow for dplyr for future analysis
 
 wlr_format <- wlr %>%
   select(Date.Time, !starts_with("Creek")) %>%
@@ -85,66 +92,72 @@ wlr_format <- wlr %>%
 
 #Chapter 4: Calculate the High and Low Tide for every 12.5 hours (every full tidal cycle)
 
-wlr_tides <- wlr_format %>%
-  group_by(WLR) %>%
-  arrange(Date.Time) %>%
-  summarise(HL(level = elev, time = Date.Time, period = 12.5)) %>%
-  ungroup() %>%
-  rename(Date.Time = time) %>%
-  mutate(Date.Time = as.POSIXct(Date.Time, format = '%Y-%m-%d %H:%M:%S'))
+# One of the conundrums with using the VulnToolKit package for groundwater and pool water elevations, 
+# is that it struggles to determine when and when low and high tides take place. At times, 
+# the package does not locate a single high or low tide during a 12.5 hour period.
 
+# To get around this, we will calculate the high and low tides based on the timing of the tides
+# from the creek WLRs. The dates and times for each low and high tide will be extracted from the 
+# dataset created in the previous R script. The dates and times will then be used to determine
+# the low and high tides for each groundwater and pool water level recorder. 
+
+# Due to small timing differences between high and low tides between the creek and groundwater
+# loggers, there is a 1 hour window before and after the creek low/high tide to calculate the
+# low/high tide for the groundwater loggers. 
+
+#Step 1: Determine and Extract the Date - Times of tides from Creek
+
+tides_creek_seq <- tides_creek %>%
+  #Calculate the time 1 hr before and after each low/high tide
+  mutate(seq_low = Date.Time - hours(2),
+         seq_high = Date.Time + hours(2)) %>%
+  #Group and nest each Creek WLR and tide type (low, high)
+  group_by(Date.Time, WLR, tide) %>%
+  nest() %>%
+  #Create a 1 hour buffer (10 min intervals) before and after each low/high tide (2 hour total buffer),
+  #Use the map function to create sequence independently for each WLR, tide type
+  summarise(tide_seq = map(.x = data,
+                           ~seq(from = .x$seq_low, to = .x$seq_high, by = '10 mins'))) %>%
+  unnest(tide_seq) %>%
+  ungroup() %>%
+  #Rename columns for merging 
+  rename(Associated_Creek = "WLR",
+         Date_Group = "Date.Time",
+         Date.Time = "tide_seq")
+
+
+#Step 2: Using the 1 hour sequences from the Creek tides, extract low and high tides of groundwater WLRs
+
+wlr_tides <- wlr_format %>%
+  # Merge the Associated Creek column of the elevations dataset to the water elevations dataset
+  merge(select(elevs, WLR, Associated_Creek), by = "WLR") %>%
+  group_by(WLR) %>%
+  #Merge the 1 hour high/low tide sequences with the groundwater elevations dataset
+  # based on the Associated_Creek and Date-Time columns
+  merge(tides_creek_seq, by = c("Date.Time", "Associated_Creek")) %>%
+  ungroup() %>%
+  group_by(WLR, Date_Group, tide) %>%
+  #Calculate the high tide as the maximum water elevation in the time buffer,
+  #Calculate the low tide as teh minimum water elevation in the time buffer
+  mutate(tide_elev = ifelse(tide == "H", max(elev),
+                            ifelse(tide == "L", min(elev), elev))) %>%
+  arrange(WLR, Date.Time) %>%
+  filter(elev == tide_elev) %>%
+  ungroup() %>%
+  #Remove duplicates from the dataset
+  distinct(WLR, elev, tide, Date_Group, .keep_all = TRUE) %>%
+  select(WLR, Date.Time, tide, elev)
 
 glimpse(wlr_tides)
 
 
-#One of the issues with analyzing tidal hydrology for groundwater and pools is that the VulnToolkit
-#package has a hard time differentiating high tides when the water level is relatively flat over a long
-# period of time (say groundwater during low tide). So, we have to manually correct it
+#Step 3: calculate the mean and standard error for the daily low and high tides
 
-
-#Calculate the max high tide for every 12 hours, which is differentiated for every AM (12AM - 12 PM) and PM
-wlr_tides_high <- wlr_tides %>%
-  filter(tide == "H") %>%
-  mutate(
-    month = month(Date.Time),
-    day = day(Date.Time),
-    daylight = ifelse(am(Date.Time), "AM", "PM")) %>%
-  group_by(WLR, month, day, daylight, tide) %>%
-  summarise(
-    level = max(level),
-    rank = which.max(level),
-    time = Date.Time[rank],
-    tide = tide[rank]) %>%
-  ungroup()
-
-#Calculate the minimum low tide for every 12 hours, which is differentiated for every AM (12AM - 12PM)
-wlr_tides_low <- wlr_tides %>%
-  filter(tide == "L") %>%
-  mutate(
-    month = month(Date.Time),
-    day = day(Date.Time),
-    daylight = ifelse(am(Date.Time), "AM", "PM")) %>%
-  group_by(WLR, month, day, daylight, tide) %>%
-  summarise(
-    level = max(level),
-    rank = which.max(level),
-    time = Date.Time[rank],
-    tide = tide[rank]) %>%
-  ungroup()
-
-
-#Combine the datasets for the full, more accurate dataset of low and high tides
-
-wlr_tides_compiled <- rbind(wlr_tides_high, wlr_tides_low) %>%
-  arrange(WLR, time)
-
-#Lastly, calculate the mean and standard error for the daily low and high tides
-
-wlr_tides_stats <- wlr_tides_compiled %>%
+wlr_tides_stats <- wlr_tides %>%
   group_by(WLR, tide) %>%
   summarise(
-    avg_elev = mean(level),
-    se_elev = sd(level)/sqrt(n()),
+    avg_elev = mean(elev),
+    se_elev = sd(elev)/sqrt(n()),
     count = n()) %>%
   ungroup() %>%
   mutate(across(avg_elev:se_elev, ~round(., 3)))
@@ -156,15 +169,22 @@ wlr_tides_stats <- wlr_tides_compiled %>%
 # The process of determining the Higher High tide for each 24 hour day is similar to the high and low tides
 # Except, instead of every 12 hours, we are interested in the full 24 hours!
 
-wlr_tides_stats2 <- wlr_tides %>%
-  filter(tide2 == "HH") %>%
+wlr_tides_hh <- wlr_tides %>%
+  #Removes low tides from consideration
+  filter(tide == "H") %>%
+  mutate(month = months(Date.Time),
+         day = day(Date.Time)) %>%
+    group_by(WLR, month, day) %>%
+  #Keeps only the maximum high tide elevation (of the 2 high tides) per day for each WLR
+      filter(elev == max(elev)) %>%
+        ungroup() %>%
   group_by(WLR) %>%
-  summarise(
-    avg_hh = mean(level),
-    se_hh = sd(level/sqrt(n())),
-    count = n()) %>%
-  ungroup() %>%
-  mutate(across(avg_hh:se_hh, ~round(., 3)))
+  #Calculates mean and standard error for higher high tide
+    summarise(avg_hh = mean(elev, na.rm = TRUE),
+            se_hh = sd(elev, na.rm = TRUE)/sqrt(n())) %>%
+ungroup()
+
+
 
 
 #Calculates the maximum observed water level elevation from the original wlr_format dataset
@@ -189,21 +209,23 @@ groundwater_stats <- data.frame(matrix(nrow = length(unique(wlr_format$WLR)),
   SetNames(c("WLR", "Mean_LT", "SE_LT", "Mean_HT", "SE_HT", "Mean_HHT", "SE_HHT", "Max_Tide")) %>%
   mutate(
     WLR = unique(wlr_format$WLR),
-    
+    #Add the mean and standard error of low tide elevation
     Mean_LT = wlr_tides_stats$avg_elev[wlr_tides_stats$tide == "L"],
     SE_LT = wlr_tides_stats$se_elev[wlr_tides_stats$tide == "L"],
-    
+    #Add the mean and standard error of high tide elevation
     Mean_HT = wlr_tides_stats$avg_elev[wlr_tides_stats$tide == "H"],
     SE_HT = wlr_tides_stats$se_elev[wlr_tides_stats$tide == "H"],
-    
-    Mean_HHT = wlr_tides_stats2$avg_hh,
-    SE_HHT = wlr_tides_stats2$se_hh,
-    
+    #add the mean and standard error of higher high tide elevation
+    Mean_HHT = wlr_tides_hh$avg_hh,
+    SE_HHT = wlr_tides_hh$se_hh,
+    #Add the maximum tide elevation
     Max_Tide = wlr_tides_max$max_tide)
 
 
 write.csv(groundwater_stats,
           "Output Stats\\Groundwater Hydrology Stats.csv")
+
+
 
 
 
@@ -308,22 +330,4 @@ write.csv(wlr_stats,
 
 #If applicable to the project, move onto the Sparrow Island Analysis R Code. If constructed sparrow islands
 # are not a part of the project, move onto the Graphing R Code. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
