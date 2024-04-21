@@ -9,13 +9,17 @@ The R package was created to expedite the analysis of tidal water elevation - ti
 
 Any user is free (and encouraged!) to download and use the R project. Note of Warning - the code may be updated from time to time to ensure compatibility with R package updates and enhance capabilities. 
 
-Monitoring Design Requirements:
+Notes on Monitoring Design and Code Compatibility:
 
 The R code is specifically written to meet the hydrology monitoring protocols of the Coastal Habitat Restoration Team. In a given area of salt marsh, two types of water level recorders are deployed simultaneously: Creek and Groundwater/Pool WLRs. The creek WLRs are deployed in ditches or creeks to monitor the site-level tidal hydrology. The groundwater and pool WLRs are placed in PVC piezometers and set 50 - 60 cm belowground with the specific aim of monitoring the changes in groundwater at specific locations. The Coastal Habitat Restoration Team conducts monitoring of salt marsh restoration projects in a BACI design where there is one WLR in the creek, one in the impacted or restored marsh, one in a 'pristine' reference marsh, and one in a degraded no action marsh. The basic requirements for the monitoring design (and R Code) is to have at least one creek WLR and one groundwater/pool WLR. 
 
+However, if your monitoring design does not include groundwater WLRs nor pertain to a restoration monitoring project, good news! All you need to use is Scripts 1 (data formatting), 2 (creek hydrology), and 5 (graphing) and simply skip over scripts 3 and 4.
+
+Overall, the code is standardized to accomodate different monitoring strategies and combinations of creek and groundwater WLRs. As long as the input data is in the correct format, it should work! 
+
 Project Overview:
 
-A brief description of the five R code scripts is provided:
+A brief description of the five R code scripts is provided below. Please note that each R script is heavily annotated to explain analysis steps, reasonings for certain steps, and explaination of crucial functions. 
 
 1) Format Dataset - R script formats the water level elevation - time series dataset to allow for use in the rest of the R scripts
 
