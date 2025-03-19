@@ -105,7 +105,7 @@ wlr_tides_stats2 <- wlr_tides %>%
   group_by(WLR) %>%
   summarise(
     avg_hh = mean(level),
-    se_hh = sd(level/sqrt(n())),
+    se_hh = sd(level)/sqrt(n()),
     count = n()) %>%
   ungroup() %>%
   mutate(across(avg_hh:se_hh, ~round(., 3)))

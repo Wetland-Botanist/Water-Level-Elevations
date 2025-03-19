@@ -304,7 +304,7 @@ wlr_freq_format <- wlr_freq %>%
 
 #Chapter 9: Wrap all of the data analysis into one nice table, calculate mean drainage metric
 
-#Reformat the elevs dataset to make it easier to cbind() to the flooding duraiton and frequency dataframes
+#Reformat the elevs dataset to make it easier to cbind() to the flooding duration and frequency dataframes
 elevs_format <- elevs %>%
   select(WLR, Marsh_Elevation, Rootzone_Elevation) %>%
   gather(key = zone, value = elevation, Marsh_Elevation, Rootzone_Elevation) %>%
